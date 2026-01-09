@@ -18,7 +18,7 @@ public class Evidence {
     private Long uploadedBy;
     private LocalDateTime uploadedAt;
 
-    // 🔹 SOFT DELETE
+    
     private Boolean isDeleted = false;
     private LocalDateTime deletedAt;
     private String deletedBy;
@@ -26,8 +26,6 @@ public class Evidence {
     @ManyToOne
     @JoinColumn(name = "fir_id")
     private FIR fir;
-
-    // ================= GETTERS & SETTERS =================
 
     public Long getId() {
         return id;

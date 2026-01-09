@@ -53,11 +53,12 @@ public class EvidenceController {
         String type = Files.probeContentType(file.getFile().toPath());
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(type))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + file.getFilename() + "\"")
-                .body(file);
+            .contentType(MediaType.parseMediaType(type))
+            .header(HttpHeaders.CONTENT_DISPOSITION,
+                "inline; filename=\"" + file.getFilename() + "\"")
+            .body(file);
     }
+
 
     // ================= ADMIN VIEW =================
     @GetMapping("/admin/view/{id}")

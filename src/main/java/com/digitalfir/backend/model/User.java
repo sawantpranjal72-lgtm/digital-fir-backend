@@ -1,5 +1,6 @@
 package com.digitalfir.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,23 +13,77 @@ public class User {
 
     private String name;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore
     private String password;
 
-    @Enumerated(EnumType.STRING)  // 🔹 Enum store as String
+    @Enumerated(EnumType.STRING)
     private Role role;
 
-    // ================= GETTERS & SETTERS =================
-    public Long getId() { return id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    private boolean enabled = true;
+
+    // 🔥 Police profile mapping
+    @OneToOne(mappedBy = "user")
+    @JsonIgnore
+    private PoliceProfile policeProfile;
+
+
+    // ===== GETTERS / SETTERS =====
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public PoliceProfile getPoliceProfile() {
+        return policeProfile;
+    }
+
+    public void setPoliceProfile(PoliceProfile policeProfile) {
+        this.policeProfile = policeProfile;
+    }
 }
+
+
 

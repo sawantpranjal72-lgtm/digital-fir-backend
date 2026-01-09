@@ -14,22 +14,27 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // ⚠️ production मध्ये हा env variable पासून घ्यावा
-    private static final String SECRET = "digitalfir_secret_key_12345digitalfir_secret_key_12345"; // 32+ bytes
-    private static final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
+    private static final String SECRET =
+            "digitalfir_secret_key_12345digitalfir_secret_key_12345";
+    private static final Key SECRET_KEY =
+            Keys.hmacShaKeyFor(SECRET.getBytes());
 
     // ===================== EXTRACT =====================
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
+
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+        return resolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
@@ -45,12 +50,21 @@ public class JwtService {
     }
 
     // ===================== GENERATE =====================
-    public String generateToken(String username) {
+    public String generateToken(UserDetails userDetails) {
+
+        String role = userDetails.getAuthorities()
+                .stream()
+                .findFirst()
+                .map(a -> a.getAuthority()) // ROLE_ADMIN
+                .orElse("");
+
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                // 10 hours validity
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .setSubject(userDetails.getUsername())
+                .claim("role", role) // 🔥 IMPORTANT
+                .setIssuedAt(new Date())
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)
+                )
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -58,6 +72,8 @@ public class JwtService {
     // ===================== VALIDATE =====================
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return username.equals(userDetails.getUsername())
+                && !isTokenExpired(token);
     }
 }
+

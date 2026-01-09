@@ -14,7 +14,7 @@ public class FIR {
 
     private String complainantName;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String complaintDetails;
 
     @Enumerated(EnumType.STRING)
@@ -23,22 +23,19 @@ public class FIR {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Long createdBy; // user id (citizen)
-
-    // ================= JPA LIFECYCLE =================
+    private Long createdBy;
 
     @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.status = FirStatus.CREATED;
+    public void onCreate() {
+        if (this.status == null) {
+            this.status = FirStatus.SUBMITTED;
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
-    // ================= GETTERS & SETTERS =================
 
     public Long getId() {
         return id;

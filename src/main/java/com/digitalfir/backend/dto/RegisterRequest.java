@@ -7,9 +7,9 @@ public class RegisterRequest {
     private String name;
     private String email;
     private String password;
-    private Role role;  // 🔹 नवं field
+    private Role role;  
 
-    // ================= GETTERS =================
+  
     public String getName() {
         return name;
     }
@@ -26,7 +26,7 @@ public class RegisterRequest {
         return role;
     }
 
-    // ================= SETTERS =================
+  
     public void setName(String name) {
         this.name = name;
     }

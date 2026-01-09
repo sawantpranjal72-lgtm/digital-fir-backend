@@ -20,7 +20,7 @@ public class FirStatusHistory {
     @Enumerated(EnumType.STRING)
     private FirStatus newStatus;
 
-    private Long changedBy;   // userId
+    private Long changedBy;  
     private LocalDateTime changedAt;
 
     @PrePersist
@@ -28,7 +28,6 @@ public class FirStatusHistory {
         this.changedAt = LocalDateTime.now();
     }
 
-    // ===== Getters & Setters =====
 
     public void setFir(FIR fir) {
         this.fir = fir;

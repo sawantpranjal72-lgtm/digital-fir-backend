@@ -34,9 +34,18 @@ public class UserService {
     }
 
     // ================= GET USER BY EMAIL =================
-    public User getByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found with email: " + email)
+                );}
+// ================= ENABLE / DISABLE USER =================
+    public void toggleUser(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setEnabled(!user.isEnabled());
+        userRepository.save(user);
     }
 }
 

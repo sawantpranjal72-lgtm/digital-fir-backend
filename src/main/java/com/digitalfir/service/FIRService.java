@@ -22,14 +22,15 @@ public class FIRService {
     // ================= CREATE FIR (CITIZEN ONLY) =================
     public FIR createFIR(FIR fir, String userEmail) {
 
-        User user = userService.getByEmail(userEmail);
+    	User user = userService.getUserByEmail(userEmail);
+
 
         if (user.getRole() != Role.CITIZEN) {
             throw new RuntimeException("Only Citizen can create FIR");
         }
 
         fir.setCreatedBy(user.getId());
-        fir.setStatus(FirStatus.CREATED); // default status
+        fir.setStatus(FirStatus.SUBMITTED); // default status
 
         return firRepository.save(fir);
     }
@@ -37,7 +38,7 @@ public class FIRService {
     // ================= GET MY FIRs (CITIZEN) =================
     public List<FIR> getFirsByUser(String userEmail) {
 
-        User user = userService.getByEmail(userEmail);
+    	User user = userService.getUserByEmail(userEmail);
 
         if (user.getRole() != Role.CITIZEN) {
             throw new RuntimeException("Only Citizen can view their FIRs");
@@ -49,7 +50,8 @@ public class FIRService {
     // ================= GET ALL FIRs (POLICE / ADMIN) =================
     public List<FIR> getAllFirs(String userEmail) {
 
-        User user = userService.getByEmail(userEmail);
+    	User user = userService.getUserByEmail(userEmail);
+
 
         if (user.getRole() == Role.CITIZEN) {
             throw new RuntimeException("Citizen cannot view all FIRs");
@@ -61,18 +63,18 @@ public class FIRService {
     // ================= UPDATE FIR STATUS =================
     public FIR updateFIRStatus(Long firId, FirStatus newStatus, String userEmail) {
 
-        User user = userService.getByEmail(userEmail);
+    	User user = userService.getUserByEmail(userEmail);
 
         FIR fir = firRepository.findById(firId)
                 .orElseThrow(() -> new RuntimeException("FIR not found"));
 
         // 🚫 Citizen rule
+     // 🚫 Citizen cannot update status at all
         if (user.getRole() == Role.CITIZEN) {
-            if (fir.getStatus() != FirStatus.CREATED ||
-                newStatus != FirStatus.SUBMITTED) {
-                throw new RuntimeException("Citizen can only submit FIR");
-            }
+            throw new RuntimeException("Citizen is not allowed to update FIR status");
         }
+
+        
 
         // 👮 Police rule
         if (user.getRole() == Role.POLICE) {
@@ -97,7 +99,7 @@ public class FIRService {
     // ================= DELETE FIR (POLICE / ADMIN) =================
     public void deleteFIR(Long firId, String userEmail) {
 
-        User user = userService.getByEmail(userEmail);
+    	User user = userService.getUserByEmail(userEmail);
 
         if (user.getRole() == Role.CITIZEN) {
             throw new RuntimeException("Citizen cannot delete FIR");

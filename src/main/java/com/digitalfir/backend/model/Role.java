@@ -1,8 +1,10 @@
 package com.digitalfir.backend.model;
 
 public enum Role {
-    CITIZEN,
+    ADMIN,
     POLICE,
-    ADMIN
+    CITIZEN,
+    POLICE_PENDING
 }
+
 
