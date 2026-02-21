@@ -24,15 +24,16 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
     private final CustomUserDetailsService userDetailsService;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtFilter,
-                          CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtFilter,
+            CustomUserDetailsService userDetailsService
+    ) {
         this.jwtFilter = jwtFilter;
         this.userDetailsService = userDetailsService;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
             .cors(cors -> {})
@@ -47,36 +48,34 @@ public class SecurityConfig {
                         "/swagger-ui.html",
                         "/v3/api-docs/**"
                 ).permitAll()
-                
-                
+
+                // ===== PUBLIC FILE ACCESS =====
                 .requestMatchers("/uploads/**").permitAll()
 
-
-                // ===== EVIDENCE VIEW (INLINE PREVIEW) =====
+                // ===== EVIDENCE VIEW (PUBLIC PREVIEW) =====
                 .requestMatchers(
                         HttpMethod.GET,
                         "/api/evidence/view/**"
                 ).permitAll()
 
-                // ===== EVIDENCE POLICE / ADMIN =====
+                // ===== EVIDENCE UPLOAD / MANAGEMENT =====
                 .requestMatchers(
                         "/api/evidence/upload/**",
                         "/api/evidence/fir/**",
                         "/api/evidence/admin/view/**",
                         "/api/evidence/**"
-                ).hasAnyAuthority("ROLE_CITIZEN","ROLE_POLICE", "ROLE_ADMIN")
+                ).hasAnyAuthority("ROLE_CITIZEN", "ROLE_POLICE", "ROLE_ADMIN")
                 
-                .requestMatchers("/api/evidence/view/**")
-                .hasAnyAuthority("ROLE_CITIZEN","ROLE_POLICE","ROLE_ADMIN")
-
-                
+                // 🔔 NOTIFICATIONS – any logged in user
+                .requestMatchers("/notifications/**")
+                    .hasAnyRole("CITIZEN", "POLICE", "ADMIN")
 
 
                 // ===== ADMIN =====
                 .requestMatchers("/api/admin/**")
                 .hasAuthority("ROLE_ADMIN")
 
-                // ===== POLICE PROFILE =====
+                // ===== POLICE =====
                 .requestMatchers(HttpMethod.POST, "/api/police/profile")
                 .hasAuthority("ROLE_POLICE")
 
@@ -101,16 +100,14 @@ public class SecurityConfig {
             )
 
             .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtFilter,
-                    UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider();
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
@@ -123,7 +120,8 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+            AuthenticationConfiguration config
+    ) throws Exception {
         return config.getAuthenticationManager();
     }
 }

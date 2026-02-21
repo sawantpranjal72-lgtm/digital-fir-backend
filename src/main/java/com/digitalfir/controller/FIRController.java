@@ -4,6 +4,9 @@ import com.digitalfir.backend.model.FIR;
 import com.digitalfir.backend.model.FirStatus;
 import com.digitalfir.backend.model.FirStatusHistory;
 import com.digitalfir.service.FIRService;
+
+import lombok.Value;
+
 import com.digitalfir.repository.FirStatusHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,9 @@ import java.util.List;
 @RequestMapping("/api/fir")
 @CrossOrigin(origins = "*")
 public class FIRController {
+	
+	
+	
 
     @Autowired
     private FIRService firService;
@@ -89,4 +95,3 @@ public class FIRController {
         return ResponseEntity.ok("FIR deleted successfully");
     }
 }
-

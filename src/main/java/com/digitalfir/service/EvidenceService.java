@@ -4,6 +4,7 @@ import com.digitalfir.backend.model.*;
 import com.digitalfir.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -26,10 +27,15 @@ public class EvidenceService {
     private FIRRepository firRepository;
 
     @Autowired
+    private NotificationService notificationService; // FIX
+
+    @Autowired
     private UserRepository userRepository;
 
-    private static final String UPLOAD_DIR =
-            "C:/Users/Ravi/Desktop/Springbootproject/digital-fir/uploads/";
+    private static final String UPLOAD_DIR = "uploads";
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
 
     // ================= UPLOAD =================
     public Evidence uploadEvidence(Long firId,
@@ -42,8 +48,8 @@ public class EvidenceService {
         FIR fir = firRepository.findById(firId)
                 .orElseThrow(() -> new RuntimeException("FIR not found"));
 
-        File dir = new File(UPLOAD_DIR);
-        if (!dir.exists()) dir.mkdirs();
+        File dir = new File(uploadDir);
+           if (!dir.exists()) dir.mkdirs();
 
         String fileName =
                 System.currentTimeMillis() + "_" + file.getOriginalFilename();
@@ -60,7 +66,20 @@ public class EvidenceService {
         evidence.setFir(fir);
         evidence.setIsDeleted(false);
 
-        return evidenceRepository.save(evidence);
+        Evidence savedEvidence = evidenceRepository.save(evidence);
+
+        // 🔔 SEND NOTIFICATION TO FIR OWNER (FIX)
+        User firOwner = userRepository.findById(fir.getCreatedBy())
+                .orElseThrow(() -> new RuntimeException("FIR owner not found"));
+
+        notificationService.createNotification(
+                firOwner,
+                "New evidence uploaded for FIR #" + fir.getId(),
+                NotificationType.EVIDENCE_UPLOADED,
+                fir.getId()
+        );
+
+        return savedEvidence;
     }
 
     // ================= GET BY FIR =================
@@ -124,5 +143,3 @@ public class EvidenceService {
         evidenceRepository.save(evidence);
     }
 }
-
-

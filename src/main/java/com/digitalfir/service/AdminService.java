@@ -1,10 +1,13 @@
 package com.digitalfir.service;
 
 import com.digitalfir.backend.dto.AddPoliceRequest;
+import com.digitalfir.service.NotificationService;
+import com.digitalfir.backend.model.NotificationType;
 import com.digitalfir.backend.model.Role;
 import com.digitalfir.backend.model.User;
 import com.digitalfir.repository.UserRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,10 @@ import java.util.Map;
 
 @Service
 public class AdminService {
+	
+	// 🔔 ADD THIS
+    @Autowired
+    private NotificationService notificationService;
 
     private final UserRepository userRepo;
     private final PasswordEncoder encoder;
@@ -51,7 +58,21 @@ public class AdminService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setEnabled(!user.isEnabled());
         userRepo.save(user);
+        
+     // 🔔 NOTIFICATION
+        String msg = user.isEnabled()
+                ? "Your account has been ENABLED by admin"
+                : "Your account has been DISABLED by admin";
+
+        notificationService.createNotification(
+                user,
+                msg,
+                NotificationType.ACCOUNT_STATUS, // 👈 NEW TYPE
+                user.getId()                      // 👈 referenceId
+        );
     }
+    
+    
 
     // ================= DASHBOARD STATS =================
     public Map<String, Long> getDashboardStats() {
@@ -63,5 +84,3 @@ public class AdminService {
         return map;
     }
 }
-
-

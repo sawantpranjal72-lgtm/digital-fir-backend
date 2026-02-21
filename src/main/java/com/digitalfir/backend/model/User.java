@@ -24,7 +24,6 @@ public class User {
 
     private boolean enabled = true;
 
-    // 🔥 Police profile mapping
     @OneToOne(mappedBy = "user")
     @JsonIgnore
     private PoliceProfile policeProfile;

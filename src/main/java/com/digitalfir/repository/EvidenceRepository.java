@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface EvidenceRepository extends JpaRepository<Evidence, Long> {
 
-    // only ACTIVE evidence
+ 
     List<Evidence> findByFirAndIsDeletedFalse(FIR fir);
 }
 

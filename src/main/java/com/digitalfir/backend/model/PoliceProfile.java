@@ -19,7 +19,7 @@ public class PoliceProfile {
     private String mobileNumber;
     private String profilePhoto;
 
-    @Column(name = "police_rank") // 🔥 IMPORTANT FIX
+    @Column(name = "police_rank") 
     private String rank;
 
     @OneToOne
