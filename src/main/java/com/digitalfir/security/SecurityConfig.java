@@ -36,10 +36,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            .cors(cors -> {})
+            .cors(cors -> {})   // ✅ Use existing CorsConfig
             .csrf(csrf -> csrf.disable())
 
+            
+            
             .authorizeHttpRequests(auth -> auth
+            		
+            		.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            		.requestMatchers("/api/auth/login").permitAll()
 
                 // ===== PUBLIC =====
                 .requestMatchers(
@@ -49,40 +54,36 @@ public class SecurityConfig {
                         "/v3/api-docs/**"
                 ).permitAll()
 
-                // ===== PUBLIC FILE ACCESS =====
+                // Public File Access
                 .requestMatchers("/uploads/**").permitAll()
 
-                // ===== EVIDENCE VIEW (PUBLIC PREVIEW) =====
-                .requestMatchers(
-                        HttpMethod.GET,
-                        "/api/evidence/view/**"
-                ).permitAll()
+                // Evidence Public Preview
+                .requestMatchers(HttpMethod.GET, "/api/evidence/view/**").permitAll()
 
-                // ===== EVIDENCE UPLOAD / MANAGEMENT =====
+                // Evidence Management
                 .requestMatchers(
                         "/api/evidence/upload/**",
                         "/api/evidence/fir/**",
                         "/api/evidence/admin/view/**",
                         "/api/evidence/**"
                 ).hasAnyAuthority("ROLE_CITIZEN", "ROLE_POLICE", "ROLE_ADMIN")
-                
-                // 🔔 NOTIFICATIONS – any logged in user
+
+                // Notifications
                 .requestMatchers("/notifications/**")
-                    .hasAnyRole("CITIZEN", "POLICE", "ADMIN")
+                .hasAnyRole("CITIZEN", "POLICE", "ADMIN")
 
-
-                // ===== ADMIN =====
+                // Admin
                 .requestMatchers("/api/admin/**")
                 .hasAuthority("ROLE_ADMIN")
 
-                // ===== POLICE =====
+                // Police
                 .requestMatchers(HttpMethod.POST, "/api/police/profile")
                 .hasAuthority("ROLE_POLICE")
 
                 .requestMatchers(HttpMethod.GET, "/api/police/profile/me")
                 .hasAnyAuthority("ROLE_POLICE", "ROLE_ADMIN")
 
-                // ===== FIR =====
+                // FIR
                 .requestMatchers(HttpMethod.POST, "/api/fir/create")
                 .hasAuthority("ROLE_CITIZEN")
 
@@ -92,6 +93,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/fir/**")
                 .hasAnyAuthority("ROLE_CITIZEN", "ROLE_POLICE", "ROLE_ADMIN")
 
+                
                 .anyRequest().authenticated()
             )
 

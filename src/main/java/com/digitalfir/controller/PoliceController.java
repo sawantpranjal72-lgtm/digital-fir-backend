@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/police")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class PoliceController {
 
     private final UserRepository userRepository;

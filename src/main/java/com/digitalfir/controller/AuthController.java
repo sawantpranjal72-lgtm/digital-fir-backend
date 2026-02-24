@@ -44,23 +44,43 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        try {
 
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
 
-        String token = jwtService.generateToken(userDetails);
+            UserDetails userDetails = (UserDetails) auth.getPrincipal();
 
-        return ResponseEntity.ok(
-                Map.of(
-                        "token", token,
-                        "role", userDetails.getAuthorities().iterator().next().getAuthority()
-                )
-        );
+            String token = jwtService.generateToken(userDetails);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "token", token,
+                            "role", userDetails.getAuthorities()
+                                               .iterator()
+                                               .next()
+                                               .getAuthority()
+                    )
+            );
+
+        } catch (AuthenticationException e) {
+
+            return ResponseEntity
+                    .status(401)
+                    .body(Map.of("error", "Invalid email or password"));
+
+        } catch (Exception e) {
+
+            e.printStackTrace();  
+
+            return ResponseEntity
+                    .status(500)
+                    .body(Map.of("error", "Something went wrong"));
+        }
     }
 
     

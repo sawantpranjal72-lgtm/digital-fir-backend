@@ -23,7 +23,6 @@ import java.util.List;
 public class FIRController {
 	
 	
-	
 
     @Autowired
     private FIRService firService;
